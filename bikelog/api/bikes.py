@@ -46,8 +46,8 @@ class BikeApi(Resource):
         try:
             fmt_purchased = datetime.strptime(purchased, '%Y-%m-%d')
         except ValueError:
-            raise ClientDataError('Date {} must be formatted
-                    YYYY-MM-DD'.format(purchased))
+            raise ClientDataError('Date {} must be formatted YYYY-MM-DD'
+                .format(purchased))
 
         fmt_purchased = date(fmt_purchased.year, fmt_purchased.month,
                 fmt_purchased.day)
@@ -60,6 +60,8 @@ class BikeApi(Resource):
             return None, 400
         except DataBaseError:
             return None, 500
+
+        return {'id': bike.id}
 
 
 
