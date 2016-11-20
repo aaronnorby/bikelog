@@ -31,7 +31,7 @@ class MaintenanceEvent(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
     description = db.Column(db.String(140))
     note = db.Column(db.String(140), nullable=True)
-    bike_id = db.Column(db.Integer, db.ForeignKey('bike.id'))
+    bike_id = db.Column(db.Integer, db.ForeignKey('bike.id'), nullable=False)
     bike = db.relationship('Bike',
             backref=db.backref('maintenance_events'))
 
@@ -52,12 +52,13 @@ class Bike(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
     purchased_at = db.Column(db.DateTime(), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('bikes'))
 
-    def __init__(self, name, purchased_at):
+    def __init__(self, name, purchased_at, user):
         self.name = name
         self.purchased_at = purchased_at
+        self.user = user
 
     def __repr__(self):
         return '<Bike {}>'.format(self.name)

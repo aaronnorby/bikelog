@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 from flask_restful import Resource, Api, fields, marshal_with
 
 from bikelog import db
@@ -28,6 +28,8 @@ class BikeApi(Resource):
     @marshal_with(resource_fields)
     def get(self, bike_id):
         bike = Bike.query.get_or_404(bike_id)
+        if bike.user_id != g.current_user.id:
+          return None, 403
         return bike
 
     def post(self):
