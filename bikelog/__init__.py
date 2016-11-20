@@ -3,8 +3,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__, instance_relative_config=True)
-app.config.from_pyfile('config.py')
-app.config.from_envvar('APP_CONFIG_FILE')
+# config.py will override instance config if it exists
+app.config.from_pyfile('config.py', silent=True)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
