@@ -6,6 +6,7 @@ from flask_restful import Resource, Api, fields, marshal_with
 from bikelog import db
 from bikelog.models import Bike
 from bikelog.errors import ClientDataError
+from .authentication import token_auth
 
 bikes = Blueprint('bikes', __name__)
 bikes_api = Api(bikes)
@@ -23,6 +24,7 @@ resource_fields = {
 
 @bikes_api.resource('/bike/<int:bike_id>', '/bike')
 class BikeApi(Resource):
+    @token_auth.login_required
     @marshal_with(resource_fields)
     def get(self, bike_id):
         bike = Bike.query.get_or_404(bike_id)

@@ -1,6 +1,27 @@
 from datetime import datetime
 
-from bikelog import db
+from itsdangerous import JSONWebSignatureSerializer as JWT
+
+from bikelog import app, db
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(32), nullable=False, unique=True)
+    password_hash = db.Column(db.String(128), nullable=False)
+
+    def __init__(self, username, password_hash):
+        self.username = username
+        self.password_hash = password_hash
+
+    def generate_auth_token(self):
+        jwt = JWT(app.config['SECRET_KEY'])
+        token = jwt.dumps({'id': self.id})
+        return token
+
+    def __repr__(self):
+        return '<User {}>'.format(self.id)
 
 class MaintenanceEvent(db.Model):
     """
@@ -31,6 +52,8 @@ class Bike(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
     purchased_at = db.Column(db.DateTime(), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', backref=db.backref('bikes'))
 
     def __init__(self, name, purchased_at):
         self.name = name
