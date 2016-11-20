@@ -1,4 +1,5 @@
-from datetime import datetime, date
+from datetime import datetime
+
 from flask import Blueprint, request
 from flask_restful import Resource, Api, fields, marshal_with
 
@@ -11,7 +12,8 @@ bikes_api = Api(bikes)
 
 class PurchasedDate(fields.Raw):
     def format(self, value):
-        return value.strftime("%Y-%m-%d")
+        # note this will be utc time
+        return value.strftime('%Y-%m-%d-%H-%M')
 
 resource_fields = {
     'id': fields.Integer,
@@ -43,22 +45,23 @@ class BikeApi(Resource):
         if purchased is None:
             raise ClientDataError('Must include purchased_at field', 400)
 
+        # The following assumes UTC timezone for purchased datetime
         try:
-            fmt_purchased = datetime.strptime(purchased, '%Y-%m-%d')
+            fmt_purchased = datetime.strptime(purchased, '%Y-%m-%d-%H-%M')
         except ValueError:
-            raise ClientDataError('Date {} must be formatted YYYY-MM-DD'
+            raise ClientDataError('Date {} must be formatted YYYY-MM-DD-HH-mm'
                 .format(purchased))
 
-        fmt_purchased = date(fmt_purchased.year, fmt_purchased.month,
-                fmt_purchased.day)
         bike = Bike(name, fmt_purchased)
 
         try:
             db.session.add(bike)
             db.session.commit()
         except DataError:
+            db.session.rollback()
             return None, 400
         except DataBaseError:
+            db.session.rollback()
             return None, 500
 
         return {'id': bike.id}
