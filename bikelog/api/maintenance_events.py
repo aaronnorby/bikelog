@@ -5,6 +5,7 @@ from flask_restful import Resource, Api, fields, marshal_with
 from bikelog import db
 from bikelog.models import MaintenanceEvent, Bike
 from bikelog.errors import ClientDataError
+from .authentication import token_auth
 
 maint_events = Blueprint('maintenance_events', __name__)
 maint_events_api = Api(maint_events)
@@ -29,15 +30,19 @@ class MaintenanceEventsApi(Resource):
         'bike_id': fields.Integer
     }
 
+    @token_auth.login_required
     @marshal_with(resource_fields)
     def get(self, bike_id):
         """
         Get all events for the given bike.
         """
         bike = Bike.query.get_or_404(bike_id)
+        if bike.user_id != g.user.id:
+            return None, 403
         events = bike.maintenance_events
         return events
 
+    @token_auth.login_required
     def post(self):
         """
         Create a new maintenance event.
