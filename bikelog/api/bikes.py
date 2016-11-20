@@ -4,7 +4,7 @@ from flask import Blueprint, request, g
 from flask_restful import Resource, Api, fields, marshal_with
 
 from bikelog import db
-from bikelog.models import Bike
+from bikelog.models import Bike, User
 from bikelog.errors import ClientDataError
 from .authentication import token_auth
 
@@ -28,10 +28,11 @@ class BikeApi(Resource):
     @marshal_with(resource_fields)
     def get(self, bike_id):
         bike = Bike.query.get_or_404(bike_id)
-        if bike.user_id != g.current_user.id:
+        if bike.user_id != g.user.id:
           return None, 403
         return bike
 
+    @token_auth.login_required
     def post(self):
         """
         Create a new bike.
@@ -56,7 +57,11 @@ class BikeApi(Resource):
             raise ClientDataError('Date {} must be formatted YYYY-MM-DD-HH-mm'
                 .format(purchased))
 
-        bike = Bike(name, fmt_purchased)
+        user = User.query.get(g.user.id)
+        if user is None:
+          # since this is an authenticated route, user should exist
+          return None, 500
+        bike = Bike(name=name, purchased_at=fmt_purchased, user=user)
 
         try:
             db.session.add(bike)
@@ -67,8 +72,8 @@ class BikeApi(Resource):
         except DataBaseError:
             db.session.rollback()
             return None, 500
+        except:
+            db.session.rollback()
+            return None, 500
 
         return {'id': bike.id}
-
-
-

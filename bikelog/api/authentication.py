@@ -23,7 +23,7 @@ def verify_password(username, password):
     user = User.query.filter_by(username=username).first()
     if user is None:
         return False
-    g.current_user = user
+    g.user = user
     return check_password_hash(user.password_hash, password)
 
 @token_auth.verify_token
@@ -36,7 +36,7 @@ def verify_token(token):
     if 'id' in data:
         try:
             user = User.query.get(data['id'])
-            g.current_user = user
+            g.user = user
         except:
             return False
         return True
@@ -46,7 +46,7 @@ def verify_token(token):
 class Token(Resource):
     @basic_auth.login_required
     def get(self):
-        token = g.current_user.generate_auth_token().decode('utf-8')
+        token = g.user.generate_auth_token().decode('utf-8')
         return jsonify({ 'token': token })
 
 @authentication_api.resource('/signup')

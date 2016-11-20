@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from itsdangerous import JSONWebSignatureSerializer as JWT
+from werkzeug.security import generate_password_hash
 
 from bikelog import app, db
 
@@ -19,6 +20,10 @@ class User(db.Model):
         jwt = JWT(app.config['SECRET_KEY'])
         token = jwt.dumps({'id': self.id})
         return token
+
+    @staticmethod
+    def generate_user_password_hash(password):
+        return generate_password_hash(password)
 
     def __repr__(self):
         return '<User {}>'.format(self.id)
