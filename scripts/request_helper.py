@@ -40,6 +40,25 @@ def get_bike(username, password, bike_id):
     resp = requests.get('http://localhost:5000/api/bike/{}'.format(bike_id),
                         auth=TokenAuth(token))
 
+def post_maint_event(username, password, date, description, bike_id, note=''):
+    token = get_token(username, password)
+    payload = {
+                'date': date,
+                'description': description,
+                'bike_id': bike_id,
+                'note': note
+              }
+    resp = requests.post('http://localhost:5000/api/maintenance_events',
+                         json=payload,
+                         auth=TokenAuth(token))
+    return resp
+
+def get_maintenance_events(username, password, bike_id):
+    token = get_token(username, password)
+    resp = requests.get('http://localhost:5000/api/maintenance_events/{}'.format(bike_id),
+                        auth=TokenAuth(token))
+    return resp
+
 # Allow this to be used as a command-like script
 if args.password and args.username:
     token = get_token(args.username, args.password)
