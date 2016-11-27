@@ -76,4 +76,4 @@ class BikeApi(Resource):
             db.session.rollback()
             return None, 500
 
-        return {'id': bike.id}
+        return {'id': bike.id}, 201
