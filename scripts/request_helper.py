@@ -1,5 +1,6 @@
 import requests
 from requests.auth import AuthBase
+import pytz
 
 import argparse
 from datetime import datetime
@@ -58,6 +59,22 @@ def get_maintenance_events(username, password, bike_id):
     resp = requests.get('http://localhost:5000/api/maintenance_events/{}'.format(bike_id),
                         auth=TokenAuth(token))
     return resp
+
+def get_strava_activities(auth_token, after_date):
+    """
+    Get all activities for a user after a date. The date is assumed to be a naive
+    datetime in UTC as is stored in the database
+    """
+    date_with_tz = after_date.replace(tzinfo=pytz.utc)
+    after = int(date_with_tz.timestamp())
+    params = {'after': after}
+
+    resp = requests.get('https://www.strava.com/api/v3/athlete/activities',
+                        params=params,
+                        auth=TokenAuth(auth_token))
+    return resp
+
+
 
 # Allow this to be used as a command-like script
 if args.password and args.username:
