@@ -23,8 +23,9 @@ def get_total_miles_from_date(start_date):
     except Exception:
         raise
 
-    tot_meters = functools.reduce(lambda x, y: float(x["distance"])+float(y["distance"]),
-                                  strava_activities)
+    tot_meters = functools.reduce(lambda x, y: x + float(y["distance"]),
+                                  strava_activities,
+                                  0.0)
     # truncate/round
     tot_miles = round(tot_meters / 1609.34)
     return tot_miles
@@ -43,7 +44,6 @@ def get_strava_activities(auth_token, after_date):
                         params=params,
                         auth=TokenAuth(auth_token))
     if resp.status_code != 200:
-        # TODO
-        pass
+        raise Exception(resp.status_code, resp.reason)
 
     return resp.json()
