@@ -1,9 +1,11 @@
 from datetime import datetime
-from flask import Blueprint, request
+
+from flask import Blueprint, request, g
 from flask_restful import Resource, Api, fields, marshal_with
 
-from bikelog import db
+from bikelog import db, app
 from bikelog.models import MaintenanceEvent, Bike
+from bikelog.api.helpers import get_total_miles_from_date
 from bikelog.errors import ClientDataError
 from .authentication import token_auth
 
@@ -50,7 +52,7 @@ class MaintenanceEventsApi(Resource):
         data = request.get_json()
 
         if data is None:
-            raise ClientDataError('Must include request datar')
+            raise ClientDataError('Must include request date')
 
         event_date = data.get('date', None)
         description = data.get('description', None)
@@ -84,3 +86,43 @@ class MaintenanceEventsApi(Resource):
 
         return {'id': event.id}
 
+
+@maint_events_api.resource('/maintenance_event/distance/<int:bike_id>')
+class Distance(Resource):
+    """
+    Distances between maintenance events of a given type
+    """
+
+    @token_auth.login_required
+    def get(self, bike_id):
+        """
+        Get the distance ridden since the last maintenance event of the given type
+
+        Required params:
+            :type: [string]maintenance event description field
+        """
+        bike = Bike.query.get_or_404(bike_id)
+        if bike.user_id != g.user.id:
+            raise ClientDataError('Bike with id {} not found for user {}'.format(bike_id, g.user.id),
+                    status_code=403)
+        event_type = request.args.get('type', '')
+        if event_type == '':
+            raise ClientDataError('Must include event type')
+        events = sorted(bike.maintenance_events, key=lambda x: x.date)
+        last_event_date = None
+        for event in events:
+            if event.description == event_type:
+                last_event_date = event.date
+                break
+        try:
+            if last_event_date is None:
+                # never happened. return total miles and note
+                bike_purchase_date = bike.purchased_at
+                miles = get_total_miles_from_date(bike_purchase_date)
+            else:
+                miles = get_total_miles_from_date(last_event_date)
+        except Exception as e:
+            app.logger.error('Error getting miles: {}'.format(e))
+            return None, 500
+
+        return {'miles': miles}, 200

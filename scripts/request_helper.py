@@ -23,6 +23,8 @@ class TokenAuth(AuthBase):
 
 def get_token(username, password):
     resp = requests.get("http://localhost:5000/token", auth=(username, password))
+    if resp.status_code != 200:
+        raise Exception(resp.status_code, resp.reason)
     data = resp.json()
     return data['token']
 
@@ -75,8 +77,23 @@ def get_strava_activities(auth_token, after_date):
     return resp
 
 
+def get_miles_since_last_event(username, password, bike_id, event_type):
+    try:
+        token = get_token(username, password)
+    except Exception as e:
+        raise
 
-# Allow this to be used as a command-like script
+    params = {'type': event_type}
+    base_url = 'http://localhost:5000/api'
+    resp = requests.get('{}/maintenance_event/distance/{}'.format(
+        base_url, bike_id),
+        params=params,
+        auth=TokenAuth(token))
+
+    return resp.json()
+
+
+# Allow this to be used as a command-like script. Not built out.
 if args.password and args.username:
     token = get_token(args.username, args.password)
     print(token)
