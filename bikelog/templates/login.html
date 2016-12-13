@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <fieldset>
+    <input type="text" placeholder="username" id="username">
+    <input type="password" placeholder="password" id="password">
+    <button class="login-btn">Log in</button>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}

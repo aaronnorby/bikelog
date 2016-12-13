@@ -15,10 +15,6 @@ from .api.bikes import bikes
 from .api.maintenance_events import maint_events
 from .api.authentication import authentication
 
-@app.route('/')
-def index():
-    return "hellow wrld"
-
 app.register_blueprint(sessions_view)
 app.register_blueprint(bikes, url_prefix='/api')
 app.register_blueprint(maint_events, url_prefix='/api')

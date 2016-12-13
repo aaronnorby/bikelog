@@ -22,11 +22,25 @@ resource_fields = {
     'purchased_at': PurchasedDate
 }
 
+@bikes_api.resource('/bikes')
+class BikesApi(Resource):
+    @token_auth.login_required
+    @marshal_with(resource_fields)
+    def get(self):
+        # Assumes user has only one bike
+        bike = Bike.query.filter_by(user_id=g.user.id).first()
+        if bike is None:
+            return None, 404
+        return bike
+
+
 @bikes_api.resource('/bike/<int:bike_id>', '/bike')
 class BikeApi(Resource):
     @token_auth.login_required
     @marshal_with(resource_fields)
-    def get(self, bike_id):
+    def get(self, bike_id=None):
+        if bike_id is None:
+            raise ClientDataError('bike_id required')
         bike = Bike.query.get_or_404(bike_id)
         if bike.user_id != g.user.id:
           return None, 403

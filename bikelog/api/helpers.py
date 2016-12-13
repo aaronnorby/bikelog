@@ -1,10 +1,12 @@
+import functools
+
 import pytz
 import requests
 from requests.auth import AuthBase
-
-import functools
+from requests.exceptions import HTTPError, RequestException
 
 from bikelog import app
+from bikelog.errors import StravaApiError
 
 class TokenAuth(AuthBase):
     def __init__(self, token):
@@ -40,10 +42,18 @@ def get_strava_activities(auth_token, after_date):
     after = int(date_with_tz.timestamp())
     params = {'after': after}
 
-    resp = requests.get('https://www.strava.com/api/v3/athlete/activities',
-                        params=params,
-                        auth=TokenAuth(auth_token))
+    try:
+        resp = requests.get('https://www.strava.com/api/v3/athlete/activities',
+                timeout=0.1,
+                params=params,
+                auth=TokenAuth(auth_token))
+        resp.raise_for_status()
+    except HTTPError as e:
+        raise StravaApiError(e)
+    except RequestException as e:
+        raise StravaApiError(e)
+
     if resp.status_code != 200:
-        raise Exception(resp.status_code, resp.reason)
+        raise StravaApiError(resp.reason)
 
     return resp.json()
