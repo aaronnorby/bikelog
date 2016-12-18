@@ -1,10 +1,11 @@
 from datetime import datetime
 
 from flask import Blueprint, request, g
-from flask_restful import Resource, Api, fields, marshal_with
+from flask_restful import Resource, Api, fields, marshal
+from sqlalchemy.exc import DataError, DatabaseError
 
 from bikelog import db, app
-from bikelog.models import MaintenanceEvent, Bike
+from bikelog.models import MaintenanceEvent, MaintenanceType, Bike, User
 from bikelog.api.helpers import get_total_miles_from_date
 from bikelog.errors import ClientDataError, StravaApiError
 from .authentication import token_auth
@@ -24,27 +25,32 @@ class MaintenanceEventsApi(Resource):
     Endpoint for interacting with maintenance events for a specific bike.
     """
 
-    resource_fields = {
-        'id': fields.Integer,
-        'date': EventDate,
-        'description': fields.String,
-        'note': fields.String,
-        'bike_id': fields.Integer
-    }
 
     @token_auth.login_required
-    @marshal_with(resource_fields)
     def get(self, bike_id=None):
         """
         Get all events for the given bike.
         """
+        resource_fields = {
+            'id': fields.Integer,
+            'date': EventDate,
+            'description': fields.String,
+            'note': fields.String,
+            'bike_id': fields.Integer
+        }
+
         if bike_id is None:
             raise ClientDataError('bike_id is required')
         bike = Bike.query.get_or_404(bike_id)
         if bike.user_id != g.user.id:
             return None, 403
         events = bike.maintenance_events
-        return events
+        if events is None or len(events) is 0:
+            return {}, 200
+        events_dict = marshal(events, resource_fields, envelope='events')
+        event_types = MaintenanceType.query.filter_by(user_id=g.user.id).first()
+        events_dict['types'] = event_types.types
+        return events_dict
 
     @token_auth.login_required
     def post(self):
@@ -76,8 +82,17 @@ class MaintenanceEventsApi(Resource):
             raise ClientDataError('Must include event description')
 
         bike = Bike.query.get_or_404(bike_id)
+        user = User.query.get(g.user.id)
 
         event = MaintenanceEvent(fmt_event_date, description, note, bike)
+        existing_types = MaintenanceType.query.filter_by(user_id=user.id).first()
+        if existing_types.types is None:
+            types_list = []
+        else:
+            types_list = existing_types.types[:]
+        if description not in types_list:
+            types_list.append(description)
+            existing_types.types = types_list
 
         try:
             db.session.add(event)
@@ -89,7 +104,7 @@ class MaintenanceEventsApi(Resource):
             db.session.rollback()
             return None, 500
 
-        return {'id': event.id}
+        return {'id': event.id, 'event_types': types_list}
 
 
 @maint_events_api.resource('/maintenance_event/distance/<int:bike_id>')

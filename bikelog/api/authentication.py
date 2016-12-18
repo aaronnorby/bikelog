@@ -62,7 +62,7 @@ class Signup(Resource):
         username = data.get('username', None)
         password = data.get('password', None)
         if username is None or password is None:
-            raise ClientDataError('Must inlude username and password')
+            raise ClientDataError('Must include username and password')
         if User.query.filter_by(username=username).first() is not None:
             raise ClientDataError('Username {} is taken'.format(username))
 

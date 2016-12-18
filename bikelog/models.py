@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from itsdangerous import JSONWebSignatureSerializer as JWT
+from sqlalchemy import String
+from sqlalchemy.dialects.postgresql import ARRAY
 from werkzeug.security import generate_password_hash
 
 from bikelog import app, db
@@ -48,6 +50,20 @@ class MaintenanceEvent(db.Model):
 
     def __repr__(self):
         return '<Maint {} {}>'.format(self.date, self.description)
+
+
+class MaintenanceType(db.Model):
+    """
+    Types of maintenance events. Eg, "lube chain".
+    """
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    types = db.Column(ARRAY(String))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('types'))
+
+    def __init__(self, types, user):
+        self.types = types
+        self.user = user
 
 
 class Bike(db.Model):

@@ -12,3 +12,7 @@ def index():
 @sessions.route('/login')
 def login():
     return render_template('login.html')
+
+@sessions.route('/signup')
+def signup():
+    return render_template('signup.html')

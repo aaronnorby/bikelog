@@ -155,7 +155,10 @@ function getAllEvents() {
   })
   .then(function(data) {
     const eventList = document.getElementsByClassName('event-list')[0];
-    eventList.textContent = JSON.stringify(data);
+    const eventTypes = document.getElementsByClassName('event-types')[0];
+    const eventData = data
+    eventList.textContent = JSON.stringify(eventData.events);
+    eventTypes.textContent = JSON.stringify(eventData.types);
   })
   .catch(function(err) {
     console.log("Error getting events: ", err);

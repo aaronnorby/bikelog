@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, request, g
 from flask_restful import Resource, Api, fields, marshal_with
+from sqlalchemy.exc import DataError, DatabaseError
 
 from bikelog import db
 from bikelog.models import Bike, User
