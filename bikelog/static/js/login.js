@@ -51,6 +51,7 @@ const tokenReq = (e) => {
       return Promise.reject(new Error("missing token"));
     }
     window.localStorage.setItem('bikelock', token);
+    window.location.pathname = '/';
   })
   .catch(function(err) {
     console.log("error getting token: ", err);

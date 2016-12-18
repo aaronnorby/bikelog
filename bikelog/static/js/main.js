@@ -1,5 +1,10 @@
 let userBike;
 
+// If there's no api token, forget the whole thing
+if (!window.localStorage.getItem('bikelock')) {
+  document.body.innerHTML = `<p class="unauthorized">You don't have an auth token. Try logging in again.</p>`;
+}
+
 function createMaintEvent(eventType, date, note='') {
   // date needs to be sent YYYY-MM-DD-HH-mm in UTC
   if (!eventType) return;
