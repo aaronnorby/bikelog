@@ -68,7 +68,7 @@ class MaintenanceEventsApi(Resource):
         bike_id = data.get('bike_id', None)
 
         if bike_id is None:
-            raise ClientDataError('Must include bike id')
+            raise ClientDataError('Must include bike id', 400)
 
         if event_date is None:
             raise ClientDataError('Must include date of event', 400)
@@ -86,8 +86,9 @@ class MaintenanceEventsApi(Resource):
 
         event = MaintenanceEvent(fmt_event_date, description, note, bike)
         existing_types = MaintenanceType.query.filter_by(user_id=user.id).first()
-        if existing_types.types is None:
+        if existing_types is None or existing_types.types is None:
             types_list = []
+            existing_types = MaintenanceType([], user)
         else:
             types_list = existing_types.types[:]
         if description not in types_list:
@@ -104,7 +105,7 @@ class MaintenanceEventsApi(Resource):
             db.session.rollback()
             return None, 500
 
-        return {'id': event.id, 'event_types': types_list}
+        return {'id': event.id, 'event_types': types_list}, 201
 
 
 @maint_events_api.resource('/maintenance_event/distance/<int:bike_id>')

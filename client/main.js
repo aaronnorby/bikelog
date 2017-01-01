@@ -1,3 +1,5 @@
+require('./login');
+
 let userBike;
 
 // If there's no api token, forget the whole thing

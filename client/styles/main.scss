@@ -1,0 +1,19 @@
+.logview-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin: auto;
+  width: 75%;
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 250px;
+  }
+}
