@@ -1,5 +1,15 @@
 import React, { Component, PropTypes } from 'react';
 
+import TextField from 'material-ui/TextField';
+import RaisedButton from 'material-ui/RaisedButton';
+import DatePicker from 'material-ui/DatePicker';
+import TimePicker from 'material-ui/TimePicker';
+import { List, ListItem } from 'material-ui/List';
+import Divider from 'material-ui/Divider';
+import Subheader from 'material-ui/Subheader';
+import Paper from 'material-ui/Paper';
+import { darkBlack, lightBlack } from 'material-ui/styles/colors';
+
 import { parseDatetime } from '../actions/utils';
 
 export default class LogView extends Component {
@@ -15,40 +25,62 @@ export default class LogView extends Component {
   // TODO: disbable buttons on fetch so multiple fetches aren't overlapping
   render() {
     return (
-      <div className="logView-container">
-        <div className="controls">
-          <h2>{this.props.bike.name}</h2>
-          <fieldset>
-            <input
-              type="text"
-              id="event"
-              onChange={e => {this.onEventChange('reqDescription', e)}} />
-            <label htmlFor="event">Maintenance event</label>
-            <button onClick={this.getDistance}>Get distance</button>
-            <p>{this.props.distanceInfo}</p>
-          </fieldset>
-          <fieldset>
-            <input
-              onChange={e => {this.onEventChange('description', e)}}
-              type="text"
-              placeholder="event description" />
-            <input
-              onChange={e => {this.onEventChange('date', e)}}
-              type="text"
-              placeholder="YYYY-MM-DD-HH-mm" />
-            <input
-              onChange={e => {this.onEventChange('note', e)}}
-              type="text"
-              placeholder="note" />
-            <button onClick={this.addEvent}>Add maintenance event</button>
-          </fieldset>
-          <fieldset>
-            <button onClick={this.getAllEvents}>Get all events</button>
-          </fieldset>
-        </div>
-        <div className="list">
-          {this.renderEventTypes()}
-          {this.renderEventsList()}
+      <div className="logview-page-wrapper">
+        <h2>{this.props.bike.name}</h2>
+        <div className="logView-container">
+          <div className="controls">
+            <fieldset>
+              <TextField
+                id="event"
+                fullWidth={true}
+                floatingLabelText="Maintenance description"
+                onChange={e => {this.onEventChange('reqDescription', e)}}
+              />
+              <RaisedButton
+                primary={true}
+                label="Get distance"
+                onClick={this.getDistance}
+              />
+              <p>{this.props.distanceInfo}</p>
+            </fieldset>
+            <fieldset>
+              <TextField
+                id="description"
+                onChange={e => {this.onEventChange('description', e)}}
+                fullWidth={true}
+                floatingLabelText="Event description"
+              />
+              <DatePicker
+                hintText="Date"
+                onChange={(e, date) => { this.onEventChange('date', null, date) }}
+              />
+              <TimePicker
+                hintText="Time of maintenance"
+                onChange={(e, time) => { this.onEventChange('time', null, time) }}
+              />
+              <TextField
+                floatingLabelText="Note (optional)"
+                fullWidth={true}
+                rows={1}
+                rowsMax={2}
+                onChange={e => {this.onEventChange('note', e)}}
+              />
+              <RaisedButton
+                primary={true}
+                label="Add maintenance event"
+                onClick={this.addEvent}
+              />
+            </fieldset>
+            <fieldset>
+              <RaisedButton
+                label="Get all events"
+                onClick={this.getAllEvents}
+              />
+            </fieldset>
+          </div>
+          <div className="list">
+            {this.renderEventsList()}
+          </div>
         </div>
       </div>
     );
@@ -70,17 +102,28 @@ export default class LogView extends Component {
     if (!this.props.maintenance.events) return null;
 
     return (
-      <div>
-        {this.props.maintenance.events.map(event => {
-          return (
-            <div key={event.id}>
-              <p>{event.description}</p>
-              <p>{event.date}</p>
-              <p>{event.note}</p>
-            </div>
-          );
-        })}
-      </div>
+      <Paper zDepth={2}>
+        <List>
+          <Subheader>Maintenance Log</Subheader>
+          {this.props.maintenance.events.map(event => {
+            return (
+              <div key={event.id}>
+                <ListItem
+                  primaryText={event.description}
+                  secondaryText={
+                    <p>
+                      <span style={{ color: darkBlack }}>{event.date}</span>
+                        <br /><span style={{color: lightBlack }}>{event.note}</span>
+                      </p>
+                    }
+                    secondaryTextLines={2}
+                  />
+                <Divider />
+              </div>
+            );
+          })}
+        </List>
+      </Paper>
     );
   }
 
@@ -107,7 +150,17 @@ export default class LogView extends Component {
 
   addEvent() {
     const description = this.state.description || '';
-    const date = parseDatetime(this.state.date) || '';
+
+    try {
+      const date = parseDatetime(this.state.date, this.state.time) || '';
+    } catch(e) {
+      //TODO: propper logging and error handling
+      console.log(e);
+      return;
+    }
+    return;
+
+    const time = this.state.time || '';
     const note = this.state.note || '';
     this.props.onCreateEventRequest(this.props.bike, description, date, note);
   }

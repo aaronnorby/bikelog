@@ -1,5 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import { connect } from 'react-redux';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import {
   login, createMaintEvent, getDistanceSince, getBike,
@@ -9,9 +10,11 @@ import { getUserBike } from '../reducers';
 class App extends Component {
   render() {
     return (
-      <div>
-        {this.props.children && React.cloneElement(this.props.children, this.props)}
-      </div>
+      <MuiThemeProvider>
+        <div>
+          {this.props.children && React.cloneElement(this.props.children, this.props)}
+        </div>
+      </MuiThemeProvider>
     );
   }
 }

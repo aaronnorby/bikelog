@@ -1,11 +1,11 @@
 GULP = $(PWD)/node_modules/.bin/gulp
 KARMA = $(PWD)/node_modules/.bin/karma
 
-start:
+deprecated_start:
 		APP_CONFIG_FILE=$(PWD)/config/development.py \
 		python run.py
 
-run:
+start:
 		python manage.py runserver
 
 make_db:

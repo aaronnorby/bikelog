@@ -1,19 +1,26 @@
+@import '_normalize';
+
+.logview-page-wrapper {
+  margin: 25px;
+}
+
 .logview-container {
   display: flex;
+  flex-direction: row-reverse;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: space-between;
   margin: auto;
-  width: 75%;
 
   .controls {
     display: flex;
     flex-direction: column;
+    margin-left: 10px;
   }
 
   .list {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    flex-grow: 1;
     width: 250px;
   }
 }

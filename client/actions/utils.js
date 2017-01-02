@@ -32,8 +32,19 @@ export function getPSTOffset() {
   return -8;
 }
 
-export function parseDatetime(datetime) {
+export function parseDatetime(date, time) {
   const format = 'YYYY-MM-DD-HH-mm';
-  let parsedTime = moment(datetime, format).add(getPSTOffset(), 'h');
-  return parsedTime.format(format);
+
+  if (!date || !time) {
+    throw new Error('missing date or time params to parseDatetime');
+  }
+
+  if (date.constructor !== Date || time.constructor !== Date) {
+    throw new TypeError('Date and time must be native JavaScript Dates')
+  }
+
+  date.setHours(time.getHours());
+  date.setMinutes(time.getMinutes());
+  let datetime = moment(date).utc();
+  return datetime.format(format);
 }
