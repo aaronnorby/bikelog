@@ -8,9 +8,10 @@ import { List, ListItem } from 'material-ui/List';
 import Divider from 'material-ui/Divider';
 import Subheader from 'material-ui/Subheader';
 import Paper from 'material-ui/Paper';
+import AutoComplete from 'material-ui/AutoComplete';
 import { darkBlack, lightBlack } from 'material-ui/styles/colors';
 
-import { parseDatetime } from '../actions/utils';
+import { parseDatetime, formatDateForDisplay, formatDateTimeForDisplay } from '../actions/utils';
 
 export default class LogView extends Component {
   constructor(props) {
@@ -24,17 +25,21 @@ export default class LogView extends Component {
 
   // TODO: disbable buttons on fetch so multiple fetches aren't overlapping
   render() {
+    const eventTypes = this.props.maintenance.types || [];
+
     return (
       <div className="logview-page-wrapper">
-        <h2>{this.props.bike.name}</h2>
+        <h2>BikeLog</h2>
         <div className="logView-container">
           <div className="controls">
             <fieldset>
-              <TextField
+              <AutoComplete
                 id="event"
                 fullWidth={true}
                 floatingLabelText="Maintenance description"
-                onChange={e => {this.onEventChange('reqDescription', e)}}
+                onUpdateInput={text => {this.onEventChange('reqDescription', null, text)}}
+                dataSource={eventTypes}
+                filter={AutoComplete.fuzzyFilter}
               />
               <RaisedButton
                 primary={true}
@@ -44,9 +49,11 @@ export default class LogView extends Component {
               <p>{this.props.distanceInfo}</p>
             </fieldset>
             <fieldset>
-              <TextField
+              <AutoComplete
                 id="description"
-                onChange={e => {this.onEventChange('description', e)}}
+                onUpdateInput={text => {this.onEventChange('description', null, text)}}
+                dataSource={eventTypes}
+                filter={AutoComplete.fuzzyFilter}
                 fullWidth={true}
                 floatingLabelText="Event description"
               />
@@ -71,12 +78,6 @@ export default class LogView extends Component {
                 onClick={this.addEvent}
               />
             </fieldset>
-            <fieldset>
-              <RaisedButton
-                label="Get all events"
-                onClick={this.getAllEvents}
-              />
-            </fieldset>
           </div>
           <div className="list">
             {this.renderEventsList()}
@@ -99,20 +100,23 @@ export default class LogView extends Component {
   }
 
   renderEventsList() {
-    if (!this.props.maintenance.events) return null;
+    const events = this.props.maintenance.events || [];
+    const purchaseDate = formatDateForDisplay(this.props.bike.purchased_at);
 
     return (
       <Paper zDepth={2}>
         <List>
-          <Subheader>Maintenance Log</Subheader>
-          {this.props.maintenance.events.map(event => {
+          <Subheader>
+            Maintenance Log: {this.props.bike.name} (purchased {purchaseDate})
+        </Subheader>
+          {events.map(event => {
             return (
               <div key={event.id}>
                 <ListItem
                   primaryText={event.description}
                   secondaryText={
                     <p>
-                      <span style={{ color: darkBlack }}>{event.date}</span>
+                      <span style={{ color: darkBlack }}>{formatDateTimeForDisplay(event.date)} PST</span>
                         <br /><span style={{color: lightBlack }}>{event.note}</span>
                       </p>
                     }
@@ -131,6 +135,12 @@ export default class LogView extends Component {
     this.getBike();
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.bike.id !== nextProps.bike.id && (nextProps.bike.id !== undefined)) {
+      this.getAllEvents(nextProps.bike);
+    }
+  }
+
   onEventChange(eventType, e, val=e.target.value) {
     this.setState({ [eventType]: val });
   }
@@ -140,8 +150,9 @@ export default class LogView extends Component {
     this.props.onRequestDistance(this.props.bike, eventType);
   }
 
-  getAllEvents() {
-    this.props.onRequestAllEvents(this.props.bike);
+  getAllEvents(bike) {
+    bike = bike || this.props.bike;
+    this.props.onRequestAllEvents(bike);
   }
 
   getBike() {

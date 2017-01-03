@@ -48,3 +48,20 @@ export function parseDatetime(date, time) {
   let datetime = moment(date).utc();
   return datetime.format(format);
 }
+
+export function formatDateForDisplay(date) {
+  const inputFormat = 'YYYY-MM-DD-HH-mm';
+  const outputFormat = 'Do MMM YYYY';
+  const mDate = moment(date, inputFormat);
+  const formattedDate = mDate.format(outputFormat);
+  return formattedDate;
+}
+
+export function formatDateTimeForDisplay(datetime) {
+  const inputFormat = 'YYYY-MM-DD-HH-mm';
+  const outputFormat = 'Do MMM YYYY, hh:mm a';
+  let mDateTime = moment(datetime, inputFormat);
+  mDateTime.add(getPSTOffset(), 'h');
+  const formattedDateTime = mDateTime.format(outputFormat);
+  return formattedDateTime;
+}
