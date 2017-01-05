@@ -11,7 +11,12 @@ import Paper from 'material-ui/Paper';
 import AutoComplete from 'material-ui/AutoComplete';
 import { darkBlack, lightBlack } from 'material-ui/styles/colors';
 
-import { parseDatetime, formatDateForDisplay, formatDateTimeForDisplay } from '../actions/utils';
+import {
+  parseDatetime,
+  formatDateForDisplay,
+  formatDateTimeForDisplay,
+  getDefaultTime,
+} from '../actions/utils';
 
 export default class LogView extends Component {
   constructor(props) {
@@ -21,6 +26,10 @@ export default class LogView extends Component {
     this.getDistance = this.getDistance.bind(this);
     this.getAllEvents = this.getAllEvents.bind(this);
     this.addEvent = this.addEvent.bind(this);
+
+    this.state = {
+      time: getDefaultTime()
+    };
   }
 
   // TODO: disbable buttons on fetch so multiple fetches aren't overlapping
@@ -63,6 +72,7 @@ export default class LogView extends Component {
               />
               <TimePicker
                 hintText="Time of maintenance"
+                defaultTime={getDefaultTime()}
                 onChange={(e, time) => { this.onEventChange('time', null, time) }}
               />
               <TextField
@@ -161,15 +171,15 @@ export default class LogView extends Component {
 
   addEvent() {
     const description = this.state.description || '';
+    let date = '';
 
     try {
-      const date = parseDatetime(this.state.date, this.state.time) || '';
+      date = parseDatetime(this.state.date, this.state.time);
     } catch(e) {
       //TODO: propper logging and error handling
       console.log(e);
       return;
     }
-    return;
 
     const time = this.state.time || '';
     const note = this.state.note || '';

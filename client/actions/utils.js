@@ -27,9 +27,10 @@ export function redirectWithAuth(nextRouterState, replace) {
   }
 }
 
-export function getPSTOffset() {
+export function getPSTOffset(isDST) {
   // returns UTC offset of PST timezone ("America/Los Angeles")
-  return -8;
+  // isDST: is daylight savings time
+  return isDST ? -7 : -8;
 }
 
 export function parseDatetime(date, time) {
@@ -61,7 +62,14 @@ export function formatDateTimeForDisplay(datetime) {
   const inputFormat = 'YYYY-MM-DD-HH-mm';
   const outputFormat = 'Do MMM YYYY, hh:mm a';
   let mDateTime = moment(datetime, inputFormat);
-  mDateTime.add(getPSTOffset(), 'h');
+  mDateTime.add(getPSTOffset(mDateTime.isDST()), 'h');
   const formattedDateTime = mDateTime.format(outputFormat);
   return formattedDateTime;
+}
+
+export function getDefaultTime() {
+  let time = new Date();
+  time.setHours(0);
+  time.setMinutes(0);
+  return time;
 }
