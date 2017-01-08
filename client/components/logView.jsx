@@ -28,7 +28,10 @@ export default class LogView extends Component {
     this.addEvent = this.addEvent.bind(this);
 
     this.state = {
-      time: getDefaultTime()
+      description: '',
+      date: undefined,
+      time: getDefaultTime(),
+      note: ''
     };
   }
 
@@ -64,15 +67,18 @@ export default class LogView extends Component {
                 dataSource={eventTypes}
                 filter={AutoComplete.fuzzyFilter}
                 fullWidth={true}
+                searchText={this.state.description}
                 floatingLabelText="Event description"
               />
               <DatePicker
                 hintText="Date"
                 onChange={(e, date) => { this.onEventChange('date', null, date) }}
+                value={this.state.date}
               />
               <TimePicker
                 hintText="Time of maintenance"
                 defaultTime={getDefaultTime()}
+                value={this.state.time}
                 onChange={(e, time) => { this.onEventChange('time', null, time) }}
               />
               <TextField
@@ -81,6 +87,7 @@ export default class LogView extends Component {
                 rows={1}
                 rowsMax={2}
                 onChange={e => {this.onEventChange('note', e)}}
+                value={this.state.note}
               />
               <RaisedButton
                 primary={true}
@@ -184,5 +191,11 @@ export default class LogView extends Component {
     const time = this.state.time || '';
     const note = this.state.note || '';
     this.props.onCreateEventRequest(this.props.bike, description, date, note);
+    this.setState({
+      description: '',
+      date: undefined,
+      time: getDefaultTime(),
+      note: '',
+    });
   }
 }

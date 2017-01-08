@@ -31,7 +31,6 @@ export function maintenance(state = { isFetching: false, error: {} }, action) {
     case GET_DISTANCE_FAILURE:
     case GET_ALL_EVENTS_FAILURE:
       return Object.assign({}, state, { isFetching: false, error: action.error });
-    case MAINT_REQ_SUCCESS:
     case CREATE_MAINT_SUCCESS:
     case GET_DISTANCE_SUCCESS:
     case GET_ALL_EVENTS_SUCCESS:
