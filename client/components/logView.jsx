@@ -34,7 +34,7 @@ export default class LogView extends Component {
 
   // TODO: disbable buttons on fetch so multiple fetches aren't overlapping
   render() {
-    const eventTypes = this.props.maintenance.types || [];
+    const eventTypes = this.props.maintenance.event_types || [];
 
     return (
       <div className="logview-page-wrapper">
@@ -98,11 +98,11 @@ export default class LogView extends Component {
   }
 
   renderEventTypes() {
-    if (!this.props.maintenance.types) return null;
+    if (!this.props.maintenance.event_types) return null;
 
     return (
       <div>
-        {this.props.maintenance.types.map((type, i) => {
+        {this.props.maintenance.event_types.map((type, i) => {
           return <p key={i}>{type}</p>;
         })}
       </div>
@@ -119,9 +119,9 @@ export default class LogView extends Component {
           <Subheader>
             Maintenance Log: {this.props.bike.name} (purchased {purchaseDate})
         </Subheader>
-          {events.map(event => {
+          {events.map((event, idx) => {
             return (
-              <div key={event.id}>
+              <div key={idx}>
                 <ListItem
                   primaryText={event.description}
                   secondaryText={

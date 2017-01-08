@@ -49,7 +49,7 @@ class MaintenanceEventsApi(Resource):
             return {}, 200
         events_dict = marshal(events, resource_fields, envelope='events')
         event_types = MaintenanceType.query.filter_by(user_id=g.user.id).first()
-        events_dict['types'] = event_types.types
+        events_dict['event_types'] = event_types.types
         return events_dict
 
     @token_auth.login_required

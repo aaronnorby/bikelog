@@ -49,7 +49,7 @@ export function createMaintEvent(bike, eventType, date, note='') {
   }
 
   return dispatch => {
-    dispatch(startMaintReq());
+    dispatch(startMaintReq(data));
     return fetch('/api/maintenance_events', {
       method: 'post',
       headers: {
@@ -197,9 +197,10 @@ function getDistanceFailure(err) {
   }
 }
 
-function startMaintReq() {
+function startMaintReq(data) {
   return {
-    type: CREATE_MAINT_REQ_START
+    type: CREATE_MAINT_REQ_START,
+    data: data
   }
 }
 

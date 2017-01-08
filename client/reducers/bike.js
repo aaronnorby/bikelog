@@ -1,7 +1,4 @@
 import {
-  MAINT_REQ_START,
-  MAINT_REQ_FAILURE,
-  MAINT_REQ_SUCCESS,
   BIKE_REQ_START,
   BIKE_REQ_FAILURE,
   BIKE_REQ_SUCCESS,
@@ -21,13 +18,16 @@ export function maintenance(state = { isFetching: false, error: {} }, action) {
   switch (action.type) {
     case TOKEN_MISSING_ERROR:
       return Object.assign({}, state, { isFetching: false, error: action.error });
-    case MAINT_REQ_START:
     case CREATE_MAINT_REQ_START:
+      // optimistically update with new event
+      let events = state.events.slice() || [];
+      events.unshift(action.data);
+      return Object.assign({}, state, { events: events, isFetching: true, priorState: state });
     case GET_DISTANCE_START:
     case GET_ALL_EVENTS_START:
       return Object.assign({}, state, { isFetching: true });
-    case MAINT_REQ_FAILURE:
     case CREATE_MAINT_FAILURE:
+      return Object.assign({}, state.priorState, { isFetching: false, error: action.error });
     case GET_DISTANCE_FAILURE:
     case GET_ALL_EVENTS_FAILURE:
       return Object.assign({}, state, { isFetching: false, error: action.error });
