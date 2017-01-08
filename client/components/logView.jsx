@@ -9,6 +9,7 @@ import Divider from 'material-ui/Divider';
 import Subheader from 'material-ui/Subheader';
 import Paper from 'material-ui/Paper';
 import AutoComplete from 'material-ui/AutoComplete';
+import Dialog from 'material-ui/Dialog';
 import { darkBlack, lightBlack } from 'material-ui/styles/colors';
 
 import {
@@ -41,6 +42,7 @@ export default class LogView extends Component {
 
     return (
       <div className="logview-page-wrapper">
+        { this.renderDistanceModal() }
         <h2>BikeLog</h2>
         <div className="logView-container">
           <div className="controls">
@@ -158,6 +160,27 @@ export default class LogView extends Component {
     );
   }
 
+  renderDistanceModal() {
+    const actions = [
+      <RaisedButton
+        label="OK"
+        onTouchTap={() => { this.setState({ showDistanceModal: false }) }}
+      />
+    ];
+
+    return (
+      <Dialog
+        title="Distance"
+        actions={actions}
+        modal={false}
+        open={this.state.showDistanceModal}
+        onRequestClose={() => { this.setState({ showDistanceModal: false }) }}
+      >
+        Miles traveled since the last {this.state.reqDescription}: {this.props.maintenance.miles}
+      </Dialog>
+    );
+  }
+
   componentDidMount() {
     this.getBike();
   }
@@ -175,6 +198,7 @@ export default class LogView extends Component {
   getDistance() {
     const eventType = this.state.reqDescription;
     this.props.onRequestDistance(this.props.bike, eventType);
+    this.setState({ showDistanceModal: true });
   }
 
   getAllEvents(bike) {

@@ -4,6 +4,8 @@ Very much a work in progress.
 
 ## Getting started
 
+### Server
+
 Bikelog is written using python 3, so make sure you have that installed and on your
 path.
 
@@ -84,3 +86,37 @@ python manage.py db upgrade
 
 And that's about it. Note that because this app handles authentication via basic
 auth and jwt tokens, it must be served over https to be secure.
+
+### Frontend/Client
+
+From the root of the project:
+
+```
+npm install
+```
+
+### Starting it all
+
+To start the client in developer mode (with webpack-dev-server), run:
+
+```
+npm start
+```
+
+Start the Flask server with:
+
+```
+make start
+```
+
+Note that even with webpack-dev-server serving the client code, the Flask server is
+necessary for api calls (the webpack server is configured to proxy those requests
+to the Flask server).
+
+For production, run:
+
+```
+npm run build
+```
+
+The flask server is not yet configured to run in production.

@@ -44,7 +44,7 @@ def get_strava_activities(auth_token, after_date):
 
     try:
         resp = requests.get('https://www.strava.com/api/v3/athlete/activities',
-                timeout=0.1,
+                timeout=0.5,
                 params=params,
                 auth=TokenAuth(auth_token))
         resp.raise_for_status()

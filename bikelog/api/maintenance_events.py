@@ -131,7 +131,7 @@ class Distance(Resource):
         event_type = request.args.get('type', '')
         if event_type == '':
             raise ClientDataError('Must include event type in query string')
-        events = sorted(bike.maintenance_events, key=lambda x: x.date)
+        events = sorted(bike.maintenance_events, key=lambda x: x.date, reverse=True)
         last_event_date = None
         for event in events:
             if event.description == event_type:
