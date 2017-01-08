@@ -118,6 +118,16 @@ export default class LogView extends Component {
 
   renderEventsList() {
     const events = this.props.maintenance.events || [];
+    events.sort((a, b) => {
+      if (a.date < b.date) {
+        return 1;
+      } else if (a.date > b.date) {
+        return -1;
+      } else {
+        return 0
+      }
+    });
+
     const purchaseDate = formatDateForDisplay(this.props.bike.purchased_at);
 
     return (
