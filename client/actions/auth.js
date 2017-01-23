@@ -8,6 +8,7 @@ import {
   TOKEN_REQ_FAILURE,
 } from './constants';
 import { setToken } from './utils';
+import routes from '../routes';
 
 export function signupReq(username='', password='') {
   if (username === '' || password === '') {
@@ -65,6 +66,7 @@ export function tokenReq(username='', password='') {
       }
       setToken(token);
       dispatch(tokenReqSuccess());
+      window.location.pathname = routes.logViewRoute;
     })
     .catch(function(err) {
       dispatch(tokenReqFailure(err));
