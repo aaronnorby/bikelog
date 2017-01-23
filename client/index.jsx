@@ -19,7 +19,7 @@ render(
   <Provider store={store}>
     <Router history={browserHistory}>
       <Route path='/' component={App}>
-        <IndexRoute component={LoginForm}/>
+        <IndexRoute component={LoginForm} onEnter={redirectWithAuth}/>
         <Route path='login' component={LoginForm} onEnter={redirectWithAuth}/>
         <Route path='maint' component={LogView} onEnter={checkAuth}/>
       </Route>
