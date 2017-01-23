@@ -32,7 +32,8 @@ export default class LogView extends Component {
       description: '',
       date: undefined,
       time: getDefaultTime(),
-      note: ''
+      note: '',
+      showDistanceModal: false,
     };
   }
 
