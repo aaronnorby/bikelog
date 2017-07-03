@@ -9,6 +9,9 @@ import {
   GET_ALL_EVENTS_START,
   GET_ALL_EVENTS_FAILURE,
   GET_ALL_EVENTS_SUCCESS,
+  DELETE_MAINT_REQ_START,
+  DELETE_MAINT_FAILURE,
+  DELETE_MAINT_SUCCESS,
 } from './constants';
 
 import { getToken } from './utils';
@@ -69,6 +72,47 @@ export function createMaintEvent(bike, eventType, date, note='') {
     .catch(function(err) {
       console.log(err);
       dispatch(maintReqFailure(err));
+    });
+  }
+}
+
+export function deleteMaintEvent(bikeId, eventId) {
+  const token = getToken();
+  if (!token) {
+    return {
+      type: TOKEN_MISSING_ERROR,
+      error: 'auth token missing',
+    }
+  };
+
+  let data = {
+    'bike_id': bikeId,
+    'id': eventId,
+  };
+
+  return dispatch => {
+    dispatch(deleteReqStart(bikeId, eventId));
+    return fetch('/api/maintenance_events', {
+      method: 'delete',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(resp) {
+      if (resp.status > 399) {
+        return Promise.reject(new Error(resp.statusText));
+      }
+      return resp.json();
+    })
+    .then(function(data) {
+      dispatch(deleteReqSuccess(data));
+    })
+    .catch(function(err) {
+      console.error("DELETE request error");
+      console.error(err);
+      dispatch(deleteReqFailure(err));
     });
   }
 }
@@ -216,4 +260,25 @@ function maintReqFailure(err) {
     type: CREATE_MAINT_FAILURE,
     error: err
   }
+}
+
+function deleteReqStart(bikeId, eventId) {
+  return {
+    type: DELETE_MAINT_REQ_START,
+    data: { bike_id: bikeId, event_id: eventId},
+  };
+}
+
+function deleteReqFailure(err) {
+  return {
+    type: DELETE_MAINT_FAILURE,
+    error: err,
+  };
+}
+
+function deleteReqSuccess(data) {
+  return {
+    type: DELETE_MAINT_SUCCESS,
+    data: data,
+  };
 }

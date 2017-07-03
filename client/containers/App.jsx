@@ -3,8 +3,14 @@ import { connect } from 'react-redux';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import {
-  login, createMaintEvent, getDistanceSince, getBike,
-  getAllMaintenanceEvents } from '../actions';
+  login,
+  createMaintEvent,
+  getDistanceSince,
+  getBike,
+  getAllMaintenanceEvents,
+  deleteMaintEvent,
+} from '../actions';
+
 import { getUserBike } from '../reducers';
 
 class App extends Component {
@@ -45,7 +51,10 @@ const mapDispatchToProps = (dispatch) => {
     },
     onRequestAllEvents: bike => {
       dispatch(getAllMaintenanceEvents(bike));
-    }
+    },
+    deleteMaintEvent: (bike_id, event_id) => {
+      dispatch(deleteMaintEvent(bike_id, event_id));
+    },
   };
 }
 

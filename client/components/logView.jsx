@@ -12,6 +12,8 @@ import AutoComplete from 'material-ui/AutoComplete';
 import Dialog from 'material-ui/Dialog';
 import { darkBlack, lightBlack } from 'material-ui/styles/colors';
 
+import EventEditModal from './event-edit-modal';
+
 import {
   parseDatetime,
   formatDateForDisplay,
@@ -34,6 +36,7 @@ export default class LogView extends Component {
       time: getDefaultTime(),
       note: '',
       showDistanceModal: false,
+      showEditModal: false,
     };
   }
 
@@ -44,6 +47,7 @@ export default class LogView extends Component {
     return (
       <div className="logview-page-wrapper">
         { this.renderDistanceModal() }
+        { this.renderEventEditModal() }
         <h2>BikeLog</h2>
         <div className="logView-container">
           <div className="controls">
@@ -131,19 +135,18 @@ export default class LogView extends Component {
       }
     });
 
-    const purchaseDate = formatDateForDisplay(this.props.bike.purchased_at);
-
     return (
       <Paper zDepth={2}>
         <List>
           <Subheader>
-            Maintenance Log: {this.props.bike.name} (purchased {purchaseDate})
-        </Subheader>
+            {this.renderSubHeader()}
+          </Subheader>
           {events.map((event, idx) => {
             return (
               <div key={idx}>
                 <ListItem
                   primaryText={event.description}
+                  onClick={e => this.onLogItemClick(e, event)}
                   secondaryText={
                     <p>
                       <span style={{ color: darkBlack }}>{formatDateTimeForDisplay(event.date)} PST</span>
@@ -159,6 +162,16 @@ export default class LogView extends Component {
         </List>
       </Paper>
     );
+  }
+
+  renderSubHeader() {
+    if (!this.props.bike.id) {
+      return <span>No bike info found</span>;
+    }
+
+    const purchaseDate = formatDateForDisplay(this.props.bike.purchased_at);
+
+    return <span>Maintenance Log: {this.props.bike.name} (purchased {purchaseDate})</span>
   }
 
   renderDistanceModal() {
@@ -179,6 +192,18 @@ export default class LogView extends Component {
       >
         Miles traveled since the last {this.state.reqDescription}: {this.props.maintenance.miles}
       </Dialog>
+    );
+  }
+
+  renderEventEditModal() {
+    if (!this.state.showEditModal) return null;
+
+    return (
+      <EventEditModal
+        onClose={() => { this.setState({ showEditModal: false }) }}
+        currentEvent={this.state.editItem}
+        deleteEvent={this.props.deleteMaintEvent}
+      />
     );
   }
 
@@ -219,7 +244,7 @@ export default class LogView extends Component {
       date = parseDatetime(this.state.date, this.state.time);
     } catch(e) {
       //TODO: propper logging and error handling
-      console.log(e);
+      console.error(e);
       return;
     }
 
@@ -231,6 +256,15 @@ export default class LogView extends Component {
       date: undefined,
       time: getDefaultTime(),
       note: '',
+    });
+  }
+
+  onLogItemClick(e, maintenanceEvent) {
+    console.log(e);
+    console.log(maintenanceEvent);
+    this.setState({
+      showEditModal: true,
+      editItem: maintenanceEvent,
     });
   }
 }

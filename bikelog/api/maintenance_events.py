@@ -60,7 +60,7 @@ class MaintenanceEventsApi(Resource):
         data = request.get_json()
 
         if data is None:
-            raise ClientDataError('Must include request date')
+            raise ClientDataError('Must include request data')
 
         event_date = data.get('date', None)
         description = data.get('description', None)
@@ -106,6 +106,50 @@ class MaintenanceEventsApi(Resource):
             return None, 500
 
         return {'id': event.id, 'event_types': types_list}, 201
+
+    @token_auth.login_required
+    def put(self):
+        """
+        Update a maintenance event
+        """
+        pass
+
+    @token_auth.login_required
+    def delete(self):
+        """
+        Delete a maintenance event.
+        """
+        data = request.get_json()
+
+        if data is None:
+            raise ClientDataError('Must include request data')
+
+        event_id = data.get('id', None)
+        bike_id = data.get('bike_id', None)
+
+        if event_id is None:
+            raise ClientDataError('Must include event id', 400)
+        if bike_id is None:
+            raise ClientDataError('Must include bike id', 400)
+
+        event = MaintenanceEvent.query.get_or_404(event_id)
+        bike = Bike.query.get_or_404(event.bike_id)
+        if bike.id != bike_id:
+            raise ClientDataError('Event does not belong to the given bike', 400)
+        if bike.user_id != g.user.id:
+            return None, 403
+
+        try:
+            db.session.delete(event)
+            db.session.commit()
+        except DataError:
+            db.session.rollback()
+            return None, 400
+        except DataBaseError:
+            db.session.rollback()
+            return None, 500
+
+        return {'id': event_id}, 200
 
 
 @maint_events_api.resource('/maintenance_event/distance/<int:bike_id>')
